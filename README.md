@@ -39,10 +39,12 @@ Sometimes, you want to make sure a block of code *raises* an error. This is espe
 ### Basic Usage
 
 ```ruby
-# /spec/error_matchers_spec.rb
-RSpec.describe "Error Matchers" do
-  it "checks for raised errors" do
-    expect { 1 / 0 }.to raise_error(ZeroDivisionError)
+# /spec/error_and_change_spec.rb
+require 'thermostat'
+RSpec.describe Thermostat do
+  it "raises error for out-of-range temperature" do
+    thermostat = Thermostat.new
+    expect { thermostat.set_temperature(45) }.to raise_error(ArgumentError, /out of range/)
   end
 end
 ```
@@ -74,8 +76,8 @@ Failure/Error: expect { 1 + 1 }.to raise_error(ZeroDivisionError)
 ### Checking for Any Error
 
 ```ruby
-# /spec/error_matchers_spec.rb
-expect { raise "Oops!" }.to raise_error
+# /spec/error_and_change_spec.rb
+expect { Thermostat.new.set_temperature(200) }.to raise_error
 ```
 
 This passes if *any* error is raised.
@@ -83,15 +85,15 @@ This passes if *any* error is raised.
 ### Checking for Error Message
 
 ```ruby
-# /spec/error_matchers_spec.rb
-expect { raise "Oops!" }.to raise_error("Oops!")
+# /spec/error_and_change_spec.rb
+expect { raise "Thermostat failure!" }.to raise_error("Thermostat failure!")
 ```
 
 ### Checking for Error Class and Message
 
 ```ruby
-# /spec/error_matchers_spec.rb
-expect { raise ArgumentError, "Bad arg!" }.to raise_error(ArgumentError, "Bad arg!")
+# /spec/error_and_change_spec.rb
+expect { Thermostat.new.set_temperature(200) }.to raise_error(ArgumentError, "Temperature out of range")
 ```
 
 ### Edge Cases
@@ -131,11 +133,11 @@ Sometimes, you want to check that an action *changes* something—like the size 
 ### Usage
 
 ```ruby
-# /spec/change_matchers_spec.rb
-RSpec.describe "Change Matchers" do
-  it "checks for state change" do
-    arr = []
-    expect { arr << 1 }.to change { arr.size }.by(1)
+# /spec/error_and_change_spec.rb
+RSpec.describe Thermostat do
+  it "changes temperature when increased" do
+    thermostat = Thermostat.new
+    expect { thermostat.increase_temp }.to change { thermostat.temperature }.by(1)
   end
 end
 ```
@@ -172,21 +174,24 @@ Failure/Error: expect { arr }.to change { arr.size }.by(1)
 ### Checking for Specific Value Changes
 
 ```ruby
-# /spec/change_matchers_spec.rb
-expect { counter.increment }.to change { counter.value }.from(0).to(1)
+# /spec/error_and_change_spec.rb
+thermostat = Thermostat.new
+expect { thermostat.set_temperature(75) }.to change { thermostat.temperature }.from(70).to(75)
 ```
 
 ### Checking for No Change
 
 ```ruby
-# /spec/change_matchers_spec.rb
-expect { do_nothing }.not_to change { obj.value }
+# /spec/error_and_change_spec.rb
+thermostat = Thermostat.new
+expect { thermostat.turn_on }.not_to change { thermostat.temperature }
 ```
 
 ### Multiple Changes
 
 ```ruby
-# /spec/change_matchers_spec.rb
+# /spec/error_and_change_spec.rb
+arr = []
 expect { arr.push(1, 2) }.to change { arr.size }.by(2)
 ```
 
@@ -199,8 +204,6 @@ expect { User.create!(username: "bob") }.to change { User.count }.by(1)
 
 ---
 
----
-
 ## 3. Method & Custom Logic Matchers
 
 ### `respond_to`
@@ -208,14 +211,11 @@ expect { User.create!(username: "bob") }.to change { User.count }.by(1)
 Use `respond_to` to check if an object has a method. This is great for duck typing and making sure your objects have the right interface.
 
 ```ruby
-# /spec/respond_to_satisfy_spec.rb
-RSpec.describe "respond_to" do
-  it "checks respond_to" do
-    expect("hello").to respond_to(:upcase)
-    expect([1,2,3]).to respond_to(:each)
-    expect(42).not_to respond_to(:each)
-  end
-end
+# /spec/error_and_change_spec.rb
+thermostat = Thermostat.new
+expect(thermostat).to respond_to(:set_temperature)
+expect(thermostat).to respond_to(:turn_on)
+expect(thermostat).not_to respond_to(:fly)
 ```
 
 ### `satisfy`
@@ -223,13 +223,10 @@ end
 Use `satisfy` for custom logic that doesn't fit any other matcher. Pass a block that returns true or false.
 
 ```ruby
-# /spec/respond_to_satisfy_spec.rb
-RSpec.describe "satisfy" do
-  it "checks satisfy" do
-    expect(5).to satisfy { |n| n.odd? }
-    expect("banana").to satisfy { |s| s.length > 3 }
-  end
-end
+# /spec/error_and_change_spec.rb
+thermostat = Thermostat.new
+thermostat.set_temperature(68)
+expect(thermostat.temperature).to satisfy { |t| t.even? }
 ```
 
 **Example Output (Passing):**
@@ -263,8 +260,6 @@ Failure/Error: expect(4).to satisfy { |n| n.odd? }
 
 ---
 
----
-
 ## 4. Compound Expectations: `and` / `or`
 
 Sometimes, you want to check *multiple* things about a value. RSpec lets you combine matchers with `and` and `or` for more expressive specs.
@@ -272,13 +267,11 @@ Sometimes, you want to check *multiple* things about a value. RSpec lets you com
 ### Using `and`
 
 ```ruby
-# /spec/compound_expectations_spec.rb
-RSpec.describe "Compound Expectations" do
-  it "combines matchers with and" do
-    expect(10).to be > 5.and be < 20
-    expect("RSpec").to start_with("R").and end_with("c")
-  end
-end
+# /spec/error_and_change_spec.rb
+thermostat = Thermostat.new
+thermostat.set_temperature(75)
+expect(thermostat.temperature).to (be > 60).and be < 80
+expect(thermostat.mode).to eq(:off).or eq(:heat)
 ```
 
 **Example Output (Passing):**
