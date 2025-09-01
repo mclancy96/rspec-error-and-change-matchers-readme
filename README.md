@@ -1,6 +1,6 @@
 # RSpec: Error & Change Matchers
 
-Welcome to Lesson 15! In this lesson, we're going to take a deep dive into some of RSpec's most powerful and flexible matchers: `raise_error`, `change`, `respond_to`, `satisfy`, and the ability to combine expectations with `and`/`or`. These matchers let you test for exceptions, state changes, custom logic, and even combine multiple expectations in a single line. We'll break down each matcher, show you how and when to use them, and provide lots of examples, output, and practice prompts. Let's get started!
+In this lesson, we're going to take a deep dive into some of RSpec's most powerful and flexible matchers: `raise_error`, `change`, `respond_to`, `satisfy`, and the ability to combine expectations with `and`/`or`. These matchers let you test for exceptions, state changes, custom logic, and even combine multiple expectations in a single line. We'll break down each matcher, show you how and when to use them, and provide lots of examples, output, and practice prompts. Let's get started!
 
 ---
 
